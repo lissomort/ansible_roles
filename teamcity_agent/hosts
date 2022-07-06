@@ -1,0 +1,6 @@
+[teamcity_agents]
+192.168.1.1 ansible_ssh_port=22 ansible_ssh_user=vagrant agent_name=some_agent_name
+
+[teamcity_agents:vars]
+ansible_python_interpreter=/usr/bin/python3
+

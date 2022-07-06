@@ -1,0 +1,17 @@
+---
+# tasks file for docker-logging-driver
+
+- name: Copy daemon file
+  tags: docker-swarm
+  ansible.builtin.copy:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    follow: yes 
+
+- name: Restart docker deamon
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  become: true
+
+

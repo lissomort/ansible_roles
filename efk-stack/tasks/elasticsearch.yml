@@ -1,0 +1,54 @@
+---
+- name: Set variables
+  tags: efk-stack
+  set_fact:
+    es_pkg: /tmp/elasticsearch-{{ version }}-amd64.deb
+
+- name: Install Java
+  tags: efk-stack
+  ansible.builtin.apt:
+    name: default-jre
+    state: latest
+    update_cache: yes
+
+- name: Check if es_package is installed
+  tags: efk-stack
+  command: dpkg-query -W es_package
+  register: es_package_check_deb
+  failed_when: es_package_check_deb.rc > 1
+  changed_when: es_package_check_deb.rc == 1
+
+- name: Download Elasticsearch package
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ version }}-amd64.deb"
+    dest: "{{ es_pkg }}"
+  when: es_package_check_deb.rc == 1
+
+- name: Install Elasticsearch package
+  tags: efk-stack
+  apt: 
+    deb: "{{ es_pkg }}"
+  become: yes
+  become_method: sudo
+  when: es_package_check_deb.rc == 1
+  # apt:
+  #   deb: "{{ es_pkg }}"
+
+- name: Copy configuration file
+  tags: efk-stack
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    force: true
+
+- name: Remove Elasticsearch package
+  tags: efk-stack
+  ansible.builtin.file:
+    path: "{{ es_pkg }}"
+    state: absent
+
+- name: Stop Elasticsearch service
+  tags: efk-stack
+  ansible.builtin.systemd:
+    name: elasticsearch
+    state: stopped

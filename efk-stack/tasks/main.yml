@@ -1,0 +1,36 @@
+---
+- name: Set variables
+  tags: efk-stack
+  set_fact:
+    tls_dir: "/etc/elasticsearch/certs"
+    es_dir: "/usr/share/elasticsearch/"
+    kibana_dir: "/usr/share/kibana/"
+    root_key: root-ca.key
+    root_crt: root-ca.pem
+    admin_key: admin.key
+    admin_crt: admin.pem
+
+- name: Install Elasticsearch
+  tags: efk-stack
+  include_tasks: elasticsearch.yml
+
+- name: Install Search Guard plugin
+  tags: efk-stack
+  include_tasks: searchguard.yml
+
+- name: Install Kibana
+  tags: efk-stack
+  include_tasks: kibana.yml
+
+- name: Install Search Guard Kibana plugin
+  tags: efk-stack
+  include_tasks: searchguard_kibana.yml
+
+- name: Start services
+  tags: efk-stack
+  include_tasks: start-services.yml
+
+- name: Initialize Search Guard
+  tags: efk-stack
+  include_tasks: sg-init.yml
+
